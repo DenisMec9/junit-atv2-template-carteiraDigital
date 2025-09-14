@@ -7,8 +7,7 @@ public class DigitalWallet {
     private boolean locked;
 
     public DigitalWallet(String owner, double initialBalance) {
-        if (owner == null || owner.isBlank()) throw new IllegalArgumentException("Owner required");
-        if (initialBalance < 0) throw new IllegalArgumentException("Negative initial balance");
+        if (initialBalance < 0) throw new IllegalArgumentException("Saldo inicial negativo");
         this.owner = owner;
         this.balance = initialBalance;
         this.verified = false;
@@ -17,6 +16,7 @@ public class DigitalWallet {
 
     public String getOwner() { return owner; }
     public double getBalance() { return balance; }
+
     public boolean isVerified() { return verified; }
     public boolean isLocked() { return locked; }
 
@@ -25,26 +25,30 @@ public class DigitalWallet {
     public void unlock() { this.locked = false; }
 
     public void deposit(double amount) {
-        if (amount <= 0) throw new IllegalArgumentException("Amount must be > 0");
+        if (amount <= 0) throw new IllegalArgumentException("Depósito deve ser > 0");
         balance += amount;
     }
 
+    /** Requer verificada e não bloqueada; amount > 0; debita se houver saldo e retorna true; senão false. */
     public boolean pay(double amount) {
         ensureActiveAndVerified();
-        if (amount <= 0) throw new IllegalArgumentException("Amount must be > 0");
-        if (amount > balance) return false;
-        balance -= amount;
-        return true;
+        if (amount <= 0) throw new IllegalArgumentException("Pagamento deve ser > 0");
+        if (balance >= amount) {
+            balance -= amount;
+            return true;
+        }
+        return false;
     }
 
+    /** Requer verificada e não bloqueada; amount > 0; sempre credita. */
     public void refund(double amount) {
         ensureActiveAndVerified();
-        if (amount <= 0) throw new IllegalArgumentException("Amount must be > 0");
+        if (amount <= 0) throw new IllegalArgumentException("Estorno deve ser > 0");
         balance += amount;
     }
 
     private void ensureActiveAndVerified() {
-        if (!verified) throw new IllegalStateException("Wallet not verified");
-        if (locked) throw new IllegalStateException("Wallet is locked");
+        if (!verified) throw new IllegalStateException("Carteira não verificada");
+        if (locked) throw new IllegalStateException("Carteira bloqueada");
     }
 }
